@@ -1,11 +1,11 @@
-name: tt Run and Publish
+name: Update glossary
 
 # Controls when the workflow will run
 on:
   gollum:
     branches: [main]
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch: 
+  workflow_dispatch:
     inputs:
       glossaryDefFile:
         required: true
@@ -16,7 +16,6 @@ on:
         default: gh_pages
         description: This is where the output of script will be pushed to.
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,12 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2.2.2
-      
+
       - name: Install deps
         run: |
           git clone https://github.com/trustoverip/tt.git
           python -m pip install marko
-        
+
       - name: Set variables
         env:
           DEFAULT_GLOSSARY_DEF_FILE: glossary.json
@@ -39,19 +38,19 @@ jobs:
           echo "DEPLOY_BRANCH=${{ github.event.inputs.deployBranch || env.DEFAULT_DEPLOY_BRANCH }}" >> $GITHUB_ENV
 
       - name: Run script
-        run: ./tt/bin/tt glossary ${{ env.GLOSSARY_DEF_FILE }} >glossary.html
-        
+        run: ./tt/bin/tt glossary ${{ env.GLOSSARY_DEF_FILE }} >glossary.html.new
+
+      - name: Setup git config
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
       - name: Publishing
         run: |
-          mkdir public
-          cp glossary.html public
-          cd public
-          git config --global init.defaultBranch main
-          git init
-          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
-          git config --local user.name "${{ github.actor }}"
-          git add .
-          git commit -m "Add changes" -a
-          git push -f https://${{ secrets.ACCESS_TOKEN }}@github.com/${{ github.repository}}.git main:${{ env.DEPLOY_BRANCH }}
+          git fetch origin
+          git checkout ${{ env.DEPLOY_BRANCH }}
+          mv glossary.html.new glossary.html
+          git add glossary.html
+          git commit -m "auto-update glossary"
+          git push
           echo DONE
-
