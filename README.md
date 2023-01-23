@@ -68,3 +68,4 @@ Versioning of content will initially not be done; it will be addressed as soon a
 ## Export and Rendering
 
 In order to automatically generate a ToIP Core Terminology [Glossary](glossary@ctwg) document, a CD/CI street needs to be implemented that ensures that whenever content that is within the #toip [scope](scope@ctwg) is committed to the corpus, this results in the (re)generation of that [Glossary](glossary@ctwg) document. 
+
